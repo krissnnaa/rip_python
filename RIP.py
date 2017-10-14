@@ -138,7 +138,11 @@ def receive_table():
 
 
 def print_route_table():
+    print "The Routing Table is : \n"
     print make_message(sep='\n')
+    print
+    print
+
 
 
 # this is the extra part of the project for bonus
