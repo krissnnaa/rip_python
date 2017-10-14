@@ -47,7 +47,7 @@ IP = get_ip_address()
 SELF_NETWORK_PREFIX = get_network_prefix(IP)  # get current machine network prefix
 
 
-def make_message(sep='|'):
+def make_message():
     """
     this function is used to create message to be passed to the neighbor
     :return:
@@ -55,7 +55,7 @@ def make_message(sep='|'):
     m = []
     for k, v in routing_table.iteritems():  # iterate over key,value pairs in routing table
         m.append(' '.join([k, str(v)]))  # joins key and value with space
-    return sep.join(m)
+    return '|'.join(m)
 
 
 def main():
@@ -149,7 +149,10 @@ def receive_table():
 
 def print_route_table():
     print "The Routing Table is :"
-    print make_message(sep='\n')
+    print "Net_Prefix\tNetMask\tNext_Hop\tCost"
+    for k, v in routing_table.iteritems():
+        hop = next_hop.get(k, '')
+        print "%s\t%s\t%s\t%d" %(k, SUBNET, hop, v)
     print
     print
 
