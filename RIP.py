@@ -149,10 +149,10 @@ def receive_table():
 
 def print_route_table():
     print "The Routing Table is :"
-    print "Net_Prefix\tNetMask\tNext_Hop\tCost"
+    print "%16s %16s %16s %16s" %("Net_Prefix","NetMask","Next_Hop", "Cost")
     for k, v in routing_table.iteritems():
         hop = next_hop.get(k, '')
-        print "%s\t%s\t%s\t%d" %(k, SUBNET, hop, v)
+        print "%16s %16s %16s %16d" %(k, SUBNET, hop, v)
     print
     print
 
@@ -223,3 +223,4 @@ if __name__ == '__main__':
 
     while True:
         time.sleep(1)
+
