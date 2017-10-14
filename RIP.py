@@ -8,6 +8,7 @@ live_router_table = {}
 timer_table = {}
 
 MAX_ROUTE_VALUE = 1000  # Cost of non-neighbor routers
+INF = 999
 
 SUBNET = '255.255.255.0'  # subnet mask for all ip address
 
@@ -45,7 +46,7 @@ IP = get_ip_address()
 SELF_NETWORK_PREFIX = get_network_prefix(IP)  # get current machine network prefix
 
 
-def make_message():
+def make_message(sep='|'):
     """
     this function is used to create message to be passed to the neighbor
     :return:
@@ -53,7 +54,7 @@ def make_message():
     m = []
     for k, v in routing_table.iteritems():  # iterate over key,value pairs in routing table
         m.append(' '.join([k, str(v)]))  # joins key and value with space
-    return '|'.join(m)
+    return sep.join(m)
 
 
 def main():
@@ -68,10 +69,10 @@ def main():
         a = raw_input('Input the cost for the neighbour : ')
         cost = int(a)
 
-        neighbour_table[ip] = {'cost': cost}  # dictionary which holds ip as key
+        neighbour_table[ip] = cost  # dictionary which holds ip as key
         prefix = get_network_prefix(ip)  # and cost as a value
-        routing_table[prefix] = cost  # routing table is dictionary which holds prefix as key
-        live_router_table[ip] = 0   # and cost as a value
+        routing_table[prefix] = cost
+        live_router_table[ip] = 0  # and cost as a value
         timer_table[prefix] = 0
         i -= 1
 
@@ -84,10 +85,10 @@ def send_table():
     while True:
         message = make_message()
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        for k, v in neighbour_table.iteritems():
-            sock.sendto(message, (k, UDP_SERVER_PORT))
+        for k, v in neighbour_table.iteritems():  # must have to send corresponding node IP
+            sock.sendto(message, (k, UDP_SERVER_PORT))  # it sends msg to its neigh whose IP address if k
 
-        time.sleep(1)
+        time.sleep(5)
 
 
 def update_table(new_table, neighbour_ip):
@@ -111,14 +112,12 @@ def update_table(new_table, neighbour_ip):
         if v != MAX_ROUTE_VALUE:
             timer_table[k] = 0
 
-        if k in neighbour_table:
-            if v < neighbour_cost:
-                routing_table[k] = v
-        else:
-            new_cost = v + neighbour_cost
-            old_cost = routing_table.get(k, MAX_ROUTE_VALUE)
-            if new_cost < old_cost:
-                routing_table[k] = new_cost
+        # New updated by me
+        new_cost = v + neighbour_cost
+        if new_cost < routing_table.get(k, MAX_ROUTE_VALUE):
+            routing_table[k] = new_cost
+
+    print_route_table()
 
 
 def receive_table():
@@ -137,7 +136,12 @@ def receive_table():
         new_table = {_[0]: int(_[1]) for _ in m}  # _[0] means variable m's 0th index
         update_table(new_table, addr[0])
 
-#this is the extra part of the project for bonus
+
+def print_route_table():
+    print make_message(sep='\n')
+
+
+# this is the extra part of the project for bonus
 def update_live_router_table():
     """
     this function id used to check whether neighbors are active or not
@@ -151,12 +155,13 @@ def update_live_router_table():
             if v > 10:
                 k_prefix = get_network_prefix(k)
                 routing_table[k_prefix] = MAX_ROUTE_VALUE
-                neighbour_table[k] = {'cost': MAX_ROUTE_VALUE}
+                neighbour_table[k] = MAX_ROUTE_VALUE
 
             live_router_table[k] = v
         time.sleep(1)
 
-#this is also bonus part of the project
+
+# this is also bonus part of the project
 def update_timer_table():
     """
     this function updates timer of each entires of routing table
@@ -192,7 +197,7 @@ if __name__ == '__main__':
     t.start()
     t1 = threading.Thread(target=receive_table)
     t1.start()
-    t2 = threading.Thread(target=update_live_router_table)
-    t2.start()
-    t3 = threading.Thread(target=update_timer_table)
-    t3.start()
+    # t2 = threading.Thread(target=update_live_router_table)
+    # t2.start()
+    # t3 = threading.Thread(target=update_timer_table)
+    # t3.start()
