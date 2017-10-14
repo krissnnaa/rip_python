@@ -138,11 +138,10 @@ def receive_table():
 
 
 def print_route_table():
-    print "The Routing Table is : \n"
+    print "The Routing Table is :"
     print make_message(sep='\n')
     print
     print
-
 
 
 # this is the extra part of the project for bonus
@@ -198,10 +197,17 @@ def update_timer_table():
 if __name__ == '__main__':
     main()
     t = threading.Thread(target=send_table)
+    t.daemon = True
     t.start()
     t1 = threading.Thread(target=receive_table)
+    t1.daemon = True
     t1.start()
-    # t2 = threading.Thread(target=update_live_router_table)
-    # t2.start()
-    # t3 = threading.Thread(target=update_timer_table)
-    # t3.start()
+    t2 = threading.Thread(target=update_live_router_table)
+    t2.daemon = True
+    t2.start()
+    t3 = threading.Thread(target=update_timer_table)
+    t3.daemon = True
+    t3.start()
+
+    while True:
+        time.sleep(1)
