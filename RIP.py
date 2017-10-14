@@ -6,6 +6,7 @@ neighbour_table = {}  # Neighbor table
 routing_table = {}  # Routing table
 live_router_table = {}
 timer_table = {}
+next_hop = {}
 
 MAX_ROUTE_VALUE = 1000  # Cost of non-neighbor routers
 INF = 999
@@ -115,10 +116,12 @@ def update_table(new_table, neighbour_ip):
         if v != MAX_ROUTE_VALUE:
             timer_table[k] = 0
 
-        # New updated by me
         new_cost = v + neighbour_cost
+
+        # New updated by me
         if new_cost < routing_table.get(k, MAX_ROUTE_VALUE):
             routing_table[k] = new_cost
+            next_hop[k] = neighbour_ip
 
     print_route_table()
 
@@ -158,7 +161,7 @@ def update_live_router_table():
         for k, v in live_router_table.iteritems():
             v += 1
 
-            if v > 20:
+            if v > 8:
                 k_prefix = get_network_prefix(k)
                 routing_table[k_prefix] = MAX_ROUTE_VALUE
 
@@ -178,7 +181,7 @@ def update_timer_table():
         for k, v in timer_table.iteritems():
             v += 1
 
-            if v > 20:
+            if v > 15:
                 expired_entries.append(k)
                 if k in routing_table:
                     for e in neighbour_table.keys():
@@ -207,9 +210,9 @@ if __name__ == '__main__':
     t2 = threading.Thread(target=update_live_router_table)
     t2.daemon = True
     t2.start()
-    # t3 = threading.Thread(target=update_timer_table)
-    # t3.daemon = True
-    # t3.start()
+    t3 = threading.Thread(target=update_timer_table)
+    t3.daemon = True
+    t3.start()
 
     while True:
         time.sleep(1)
