@@ -88,7 +88,7 @@ def send_table():
         for k, v in neighbour_table.iteritems():  # must have to send corresponding node IP
             sock.sendto(message, (k, UDP_SERVER_PORT))  # it sends msg to its neigh whose IP address if k
 
-        time.sleep(5)
+        time.sleep(1)
 
 
 def update_table(new_table, neighbour_ip):
@@ -182,11 +182,11 @@ def update_timer_table():
                     for e in neighbour_table.keys():
                         e_p = get_network_prefix(e)
                         if e_p == k:
-                            routing_table[k] = neighbour_table[e]['cost']
+                            routing_table[k] = neighbour_table[e]
                             break
                     else:
                         del routing_table[k]
-
+                        print 'Removed entry from the table %s' % k
             timer_table[k] = v
 
         [timer_table.pop(k, 0) for k in expired_entries]
@@ -205,9 +205,9 @@ if __name__ == '__main__':
     t2 = threading.Thread(target=update_live_router_table)
     t2.daemon = True
     t2.start()
-    t3 = threading.Thread(target=update_timer_table)
-    t3.daemon = True
-    t3.start()
+    # t3 = threading.Thread(target=update_timer_table)
+    # t3.daemon = True
+    # t3.start()
 
     while True:
         time.sleep(1)
