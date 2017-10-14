@@ -101,12 +101,15 @@ def update_table(new_table, neighbour_ip):
     # Reset Live Router Entry to 0.
     live_router_table[neighbour_ip] = 0
 
+    neighbour_prefix = get_network_prefix(neighbour_ip)
+    neighbour_cost = routing_table[neighbour_prefix]
+
+    if routing_table.get(neighbour_prefix) == MAX_ROUTE_VALUE:
+        routing_table[neighbour_prefix] = neighbour_table[neighbour_ip]
+
     for k, v in new_table.iteritems():
         if k == SELF_NETWORK_PREFIX:
             continue
-
-        neighbour_prefix = get_network_prefix(neighbour_ip)
-        neighbour_cost = routing_table[neighbour_prefix]
 
         # Reset Timer table to 0.
         if v != MAX_ROUTE_VALUE:
@@ -155,10 +158,9 @@ def update_live_router_table():
         for k, v in live_router_table.iteritems():
             v += 1
 
-            if v > 10:
+            if v > 20:
                 k_prefix = get_network_prefix(k)
                 routing_table[k_prefix] = MAX_ROUTE_VALUE
-                neighbour_table[k] = MAX_ROUTE_VALUE
 
             live_router_table[k] = v
         time.sleep(1)
